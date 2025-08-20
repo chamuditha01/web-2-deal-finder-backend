@@ -7,11 +7,7 @@ const OpenAI = require('openai');
 const path = require('path');
 const cloudinary = require('cloudinary').v2;
 
-cloudinary.config({
-  cloud_name: 'dgg3x0tb8',
-  api_key: '426589156186855',
-  api_secret: 'jAuk8QgMSzMzFUZyLHSEBO7jv9Y',
-});
+
 
 const app = express();
 // Allow up to 3 images
@@ -23,9 +19,16 @@ const upload = multer({ dest: 'uploads/' }).fields([
 
 const PORT = 5000;
 
-const SERP_API_KEY = '0ac900afcd7b8b5ad666efe5ad25120c0dc17fa59c377645b6e57681bc352e6c';
-const PERPLEXITY_API_KEY = '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';
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+const SERP_API_KEY = process.env.SERP_API_KEY;
+const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
 
 app.use(cors({ origin: '*' }));
 app.use(express.json());
