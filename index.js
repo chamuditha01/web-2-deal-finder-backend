@@ -20,14 +20,14 @@ const upload = multer({ dest: 'uploads/' }).fields([
 const PORT = 5000;
 
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: 'dgg3x0tb8',
+  api_key: '426589156186855',
+  api_secret: 'jAuk8QgMSzMzFUZyLHSEBO7j9Y',
 });
 
-const SERP_API_KEY = process.env.SERP_API_KEY;
-const PERPLEXITY_API_KEY = process.env.PERPLEXITY_API_KEY;
-const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+const SERP_API_KEY = '0ac900afcd7b8b5ad666efe5ad25120c0dc17fa59c377645b6e57681bc352e6c';
+const PERPLEXITY_API_KEY = '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';
+const OPENAI_API_KEY = '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';
 
 
 app.use(cors({ origin: '*' }));
