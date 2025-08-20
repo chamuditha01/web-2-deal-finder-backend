@@ -25,7 +25,7 @@ const PORT = 5000;
 
 const SERP_API_KEY = '0ac900afcd7b8b5ad666efe5ad25120c0dc17fa59c377645b6e57681bc352e6c';
 const PERPLEXITY_API_KEY = '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';
-const OPENAI_API_KEY = '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';
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 
 app.use(cors({ origin: '*' }));
 app.use(express.json());
