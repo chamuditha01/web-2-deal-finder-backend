@@ -105,7 +105,7 @@ app.post('/api/scan-image', upload, async (req, res) => {
 
     // Call /api/search internally with combined keyword
     const region = req.query.region || 'global';
-    const searchRes = await axios.get(`https://deal-finder-backend-production.up.railway.app/api/search`, {
+    const searchRes = await axios.get(`https://web-2-deal-finder-backend-production.up.railway.app/api/search`, {
       params: { q: finalKeyword, exact: false, region },
     });
 
