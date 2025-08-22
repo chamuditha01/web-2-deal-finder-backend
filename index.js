@@ -1,4 +1,4 @@
-const express = require('express');
+const express = require("express");
 const axios = require('axios');
 const cors = require('cors');
 const multer = require('multer');
@@ -6,7 +6,18 @@ const fs = require('fs');
 const OpenAI = require('openai');
 const path = require('path');
 const cloudinary = require('cloudinary').v2;
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+require('dotenv').config();
 
+// Access the API key from the environment variables
+const apiKey = process.env.GOOGLE_API_KEY;
+
+// Check if the API key is available
+if (!apiKey) {
+  throw new Error("API key not found. Please set the GOOGLE_API_KEY environment variable.");
+}
+
+const genAI = new GoogleGenerativeAI(apiKey);
 
 
 const app = express();
@@ -20,14 +31,14 @@ const upload = multer({ dest: 'uploads/' }).fields([
 const PORT = 5000;
 
 cloudinary.config({
-  cloud_name: 'dgg3x0tb8',
+  cloud_name: 'dgg3x0tb8', 
   api_key: '426589156186855',
-  api_secret: 'jAuk8QgMSzMzFUZyLHSEBO7j9Y',
+  api_secret: 'jAuk8QgMSzMzFUZyLHSEBO7jv9Y',
 });
 
 const SERP_API_KEY = '0ac900afcd7b8b5ad666efe5ad25120c0dc17fa59c377645b6e57681bc352e6c';
 const PERPLEXITY_API_KEY = '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';
-const OPENAI_API_KEY = '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';
+const OPENAI_API_KEY = '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';
 
 
 app.use(cors({ origin: '*' }));
@@ -50,7 +61,7 @@ app.post('/api/scan-image', upload, async (req, res) => {
   console.log('📥 Incoming multiple image scan request...');
 
   try {
-    const files = Object.values(req.files).flat(); // flatten all uploaded files
+    const files = Object.values(req.files).flat();
     if (!files || files.length === 0) {
       return res.status(400).json({ error: 'No images uploaded' });
     }
@@ -58,42 +69,42 @@ app.post('/api/scan-image', upload, async (req, res) => {
     const detectedKeywords = [];
 
     for (const file of files) {
-      // Upload each file to Cloudinary
+      // Upload to Cloudinary
       const cloudRes = await cloudinary.uploader.upload(file.path, {
         folder: 'dealfinder',
       });
-      fs.unlinkSync(file.path); // remove local file
 
       const imageUrl = cloudRes.secure_url;
 
-      // Send each image to OpenAI
-      const result = await openai.chat.completions.create({
-        model: 'gpt-4o-mini',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are an assistant that identifies the exact product name, model, and series from images.',
-          },
-          {
-            role: 'user',
-            content: [
-              { type: 'text', text: 'Identify the product and model in this image. Only return the name, nothing else.' },
-              { type: 'image_url', image_url: { url: imageUrl } },
-            ],
-          },
-        ],
-      });
+      // Convert file to base64 (Gemini requires inline data if no public URL)
+      const base64 = fs.readFileSync(file.path).toString('base64');
+      fs.unlinkSync(file.path); // cleanup local file
 
-      const keyword = result.choices?.[0]?.message?.content?.trim();
+      // Use Gemini Vision
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+
+      const prompt = "Identify the exact product brand and model in this image. Only return the name (e.g. 'Sony WH-1000XM5'). No extra words. If cant detect exact model. give model just you detected.";
+
+      const result = await model.generateContent([
+        { text: prompt },
+        {
+          inlineData: {
+            data: base64,
+            mimeType: file.mimetype || 'image/jpeg',
+          },
+        },
+      ]);
+
+      const keyword = result.response.text().trim();
       if (keyword) detectedKeywords.push(keyword);
     }
 
     // Combine all detected keywords
-    const finalKeyword = detectedKeywords.join(' '); // merge multiple keywords
+    const finalKeyword = detectedKeywords.join(' ');
 
     // Call /api/search internally with combined keyword
     const region = req.query.region || 'global';
-    const searchRes = await axios.get(`https://web-2-deal-finder-backend-production.up.railway.app/api/search`, {
+    const searchRes = await axios.get(`https://deal-finder-backend-production.up.railway.app/api/search`, {
       params: { q: finalKeyword, exact: false, region },
     });
 
@@ -107,6 +118,8 @@ app.post('/api/scan-image', upload, async (req, res) => {
     res.status(500).json({ error: 'Image processing failed', details: err.message });
   }
 });
+
+
 
 
 // === SEARCH ENDPOINT ===
