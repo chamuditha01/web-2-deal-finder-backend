@@ -36,7 +36,8 @@ cloudinary.config({
   api_secret: 'jAuk8QgMSzMzFUZyLHSEBO7jv9Y',
 });
 
-const SERP_API_KEY = '0ac900afcd7b8b5ad666efe5ad25120c0dc17fa59c377645b6e57681bc352e6c';
+//const SERP_API_KEY = '0ac900afcd7b8b5ad666efe5ad25120c0dc17fa59c377645b6e57681bc352e6c';
+const SERP_API_KEY = process.env.SERP_API_KEY;
 const PERPLEXITY_API_KEY = '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';
 const OPENAI_API_KEY = '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';
 
